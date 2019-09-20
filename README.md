@@ -49,8 +49,7 @@ app_server.server_name = '35-205-111-103.sslip.io'
 
 ## Как проверить работоспособность:
  - https://35-205-111-103.sslip.io/
- login: pritunl
- password: P0lymorphism
+
 ## PR checklist
  - [ ] Выставил label с cloud-bastion
 
