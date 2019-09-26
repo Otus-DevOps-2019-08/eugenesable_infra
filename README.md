@@ -25,6 +25,17 @@ gcloud compute instances create new-reddit-app \
 	--metadata-from-file startup-script=./startup-cloud-testapp.sh	
 
 ```
+ - Правило firewall из консоли:
+```
+gcloud compute firewall-rules create default-puma-server \
+	--network default \
+	--action=ALLOW \
+	--direction INGRESS \
+	--target-tags puma-server \
+	--source-ranges 0.0.0.0/0 \
+	--rules tcp:9292 \
+	--description "Allow incoming traffic on TCP port 9292 for tags puma-server"
+```
 
 testapp_IP = 35.241.181.119
 testapp_port = 9292
