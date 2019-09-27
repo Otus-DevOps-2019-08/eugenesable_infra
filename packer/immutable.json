@@ -15,7 +15,7 @@
             "disk_type": "{{user `disk_type`}}",
             "image_description": "{{user `image_description`}}",
             "network": "{{user `network`}}",
-            "tags": "{{user `tag`}}"
+            "tags": "{{user `tag`}}",
             "zone": "europe-west1-b",
             "ssh_username": "appuser",
             "machine_type": "{{user `machine_type`}}"
@@ -40,12 +40,12 @@
 	{
             "type": "file",
             "source": "files/puma.service",
-            "destination": "/home/appuser/reddit/puma.service"
+            "destination": "/tmp/puma.service"
         },
 	{
             "type": "shell",
             "inline": [
-                "sudo cp /home/appuser/reddit/puma.service /etc/systemd/system/",
+                "sudo cp /tmp/puma.service /etc/systemd/system/",
                 "sudo systemctl daemon-reload",
 		"sudo systemctl start puma.service",
 		"sudo systemctl enable puma.service"
