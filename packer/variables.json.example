@@ -1,7 +1,7 @@
 {
   "project_id": "some project_id",
   "source_image_family": "some source_image_family",
-  "disk_size": some disk_size,
+  "disk_size": "some disk_size",
   "disk_type": "some disk_type",
   "image_description": "some description",
   "network": "some network",
