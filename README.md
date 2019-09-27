@@ -3,6 +3,43 @@ eugenesable Infra repository
 
 # Google Cloud Platform
 
+# Выполнено задание №4
+
+## Впроцессе сделано:
+ - Создана ветка cloud-testapp
+ - Создана папка VPN, туда перемещены файлы из прошлого ДЗ:
+   ```
+	git mv setupvpn.sh cloud-bastion.ovpn VPN/
+   ```  
+ - Созданы файлы install_ruby.sh, install_mongobd.sh, deploy_sh c chmod +x
+ - В панели GCP создано правило для порта 9292
+ - Создан startup-cloud-testapp.sh
+```
+gcloud compute instances create new-reddit-app \
+	--boot-disk-size=10GB \
+	--image-family ubuntu-1604-lts \
+	--image-project=ubuntu-os-cloud \
+	--machine-type=g1-small \
+	--tags puma-server \
+	--restart-on-failure \
+	--metadata-from-file startup-script=./startup-cloud-testapp.sh	
+
+```
+ - Правило firewall из консоли:
+```
+gcloud compute firewall-rules create default-puma-server \
+	--network default \
+	--action=ALLOW \
+	--direction INGRESS \
+	--target-tags puma-server \
+	--source-ranges 0.0.0.0/0 \
+	--rules tcp:9292 \
+	--description "Allow incoming traffic on TCP port 9292 for tags puma-server"
+```
+
+testapp_IP = 35.241.181.119
+testapp_port = 9292
+
 # Выполнено ДЗ №3
 
 ## В процессе сделано:
@@ -55,3 +92,4 @@ app_server.server_name = '35-205-111-103.sslip.io'
 
 bastion_IP = 35.205.111.103
 someinternalhost_IP = 10.132.0.3
+
