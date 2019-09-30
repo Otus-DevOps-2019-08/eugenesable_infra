@@ -3,6 +3,29 @@ eugenesable Infra repository
 
 # Google Cloud Platform
 
+# Выполнено задание №5
+
+## В процессе сделано:
+ - Ветка packer-base
+ - Скрипты *.sh перенесены в папку config-scripts
+ - Устновлен packer + авторизация ADC:
+ ```
+	gcloud auth application-default login
+ ```
+ - Добавлен ubuntu16.json в папку packer + перенесены *.sh скрипты = собран первоначальный образ
+ - Добавлен variables.json = собран проект: 
+ ``` 
+	packer built -var-file variables.json ubuntu16.json
+ ```
+ или так:
+ ```
+	packer build -var 'project_id=some_id' \
+		     -var 'source_image_family=ubuntu-1604-lts' \
+		     -var 'machine_type=f1-micro'
+ ``` 
+ - Добавлен immutable.json, который создает образ семейства reddit-full + file/puma.service
+ - Добавлен create-redditvm.sh, который поднимает инстанс семейства reddit-full
+
 # Выполнено задание №4
 
 ## Впроцессе сделано:

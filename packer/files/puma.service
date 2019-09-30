@@ -1,0 +1,24 @@
+[Unit]
+Description=Puma Service
+After=network-online.target
+
+[Service]
+Type=simple
+
+User=appuser
+Group=appuser
+
+LimitSTACK=infinity
+LimitNPROC=infinity
+LimitNOFILE=infinity
+LimitMEMLOCK=infinity
+
+RestartSec=10
+Restart=always
+
+WorkingDirectory=/home/appuser/reddit
+
+ExecStart=/usr/local/bin/puma
+
+[Install]
+WantedBy=multi-user.target
