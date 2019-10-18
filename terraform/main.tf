@@ -15,7 +15,7 @@ provider "google" {
 
 resource "google_compute_project_metadata_item" "ssh-keys" { 
   key = "ssh-key"
-  value = "appuser:${file(var.public_key_path)}\nappuser1:${file(var.public_key_path1)}\nappuser2:${file(var.public_key_path2)}"
+  value = "appuser:${file(var.public_key_path)}\nappuser1:${file(var.public_key_path)}\nappuser2:${file(var.public_key_path)}"
 }
 
 resource "google_compute_instance" "app" {
@@ -37,7 +37,7 @@ resource "google_compute_instance" "app" {
 
   metadata = {
     # путь до публичного ключа
-    ssh-keys = "appuser:${file(var.public_key_path)}\nappuser1:${file(var.public_key_path1)}\nappuser2:${file(var.public_key_path2)}"
+    ssh-keys = "appuser:${file(var.public_key_path)}\nappuser1:${file(var.public_key_path)}\nappuser2:${file(var.public_key_path)}"
     block-project-ssh-keys = false	
   }
 
