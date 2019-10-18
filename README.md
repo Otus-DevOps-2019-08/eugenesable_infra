@@ -3,6 +3,121 @@ eugenesable Infra repository
 
 # Google Cloud Platform
 
+# Выполнено задание №6
+
+ - Ветка terraform-1
+ - Установлен terraform:
+```
+brew install terraform
+```
+ - Перенесны скрипт для диплоя Монолита и puma.service в папку files/
+ - Созданы файлы: 
+
+   1. main.tf - основной файл, описывающий параметры создаваемых инстансов,  
+   2. variables.tf - входные переменные, 
+   3. terrafirm.tfvars - определение переменных, 
+   4. outputs.tf - выходные переменные
+
+ - В .gitignore добавлены служебныйе файлы
+ - Инициалализация:
+```
+terraform init
+```
+ - Просмотр изменений:
+```
+terraform plan
+```
+ - Выполнить создание инстансов:
+```
+terraform apply
+```
+ - Посмотреть внешний адрес созданного инстанса:
+```
+terraform show | grep nat_ip
+```
+ # Самостоятельное задание
+ 
+- В terraform.tfvars добален путь до private key appuser - private_key_path 
+ - В variables.tf добавлен:
+```
+variable private_key_path {
+  description = "Path to the private key used for ssh conection"
+}
+```
+ - В main.tf в блок connection добавлен: 
+``` 
+private_key = file(var.private_key_path)
+```
+- В terraform.tfvars добаленa зона для ресурса "google_compute_instance" "app"
+ - В variables.tf добавлен:
+```
+variable zone {
+  description = "Zone"
+  # Значение по умолчанию
+  default = "europe-west1-b"
+}
+```
+ - В main.tf в блок resource добавлен:
+```
+zone = var.zone
+```
+ - Форматирование конфигов:
+```
+terraform fmt
+```
+ - Добавлен файл terraform.tfvars.example 
+
+# Задание со *
+
+ - Добавлен ключ пользователя appuser1:
+```
+resource "google_compute_project_metadata_item" "ssh-keys" {
+  key = "ssh-key"
+  value = "appuser1:${file(var.public_key_path)}
+}
+``` 
+ - Добавлены ключи для appuser1, appuser2:
+```
+resource "google_compute_project_metadata_item" "ssh-keys" {
+  key = "ssh-key"
+  value = "appuser:${file(var.public_key_path)}\nappuser1:${file(var.public_key_path1)}\nappuser2:${file(var.public_key_path2)}"
+}
+```
+ - так же добавлены appuser1,appuser2 в метадату ресурса:
+```
+metadata = {
+    # путь до публичного ключа
+    ssh-keys = "appuser:${file(var.public_key_path)}\nappuser1:${file(var.public_key_path)}\nappuser2:${file(var.public_key_path)}"
+    block-project-ssh-keys = false
+  }
+```
+ - При добавления руками в веинтерфейсе GCP ssh ключа пользователю appuser_web в метаданные проекта после terrsform apply удаляются
+
+ # Задание с **
+
+ - Создан lb.tf по документации https://www.terraform.io/docs/providers/google/r/compute_target_pool.html 
+ - В outputs.tf добавлен балансировщик:
+```
+output "lb_external_ip" {
+  value = google_compute_forwarding_rule.loadbalancer-firewall.ip_address
+}
+```
+ - Добавлен ресурс reddit-app2 - такой подход с созданием доп. инстанса копированием кода выглядит нерационально, т.к. копируется много кода
+ - Решение с добавление count в описание ресурса:
+```
+  count        = var.instances
+  name         = "one-more-reddit-app${count.index}"
+```
+ - В variable.tf добалено:
+```
+variable instances {
+  description = "Count of instances"
+  default     = 1
+}
+```
+
+
+ 
 # Выполнено задание №5
 
 ## В процессе сделано:
