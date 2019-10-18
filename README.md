@@ -41,7 +41,7 @@ terraform show | grep nat_ip
  - В variables.tf добавлен:
 ```
 variable private_key_path {
-  description = "Path to the private key used for ssh conection"
+  description = "Private key path"
 }
 ```
  - В main.tf в блок connection добавлен: 
@@ -91,7 +91,7 @@ metadata = {
     block-project-ssh-keys = false
   }
 ```
- - При добавления руками в веинтерфейсе GCP ssh ключа пользователю appuser_web в метаданные проекта после terrsform apply удаляются
+ - При добавления руками в вебинтерфейсе GCP ssh ключа пользователю appuser_web в метаданные проекта после terraform apply удаляются
 
  # Задание с **
 
