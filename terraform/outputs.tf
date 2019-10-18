@@ -5,3 +5,4 @@ output "app_external_ip" {
 output "lb_external_ip" {
   value = google_compute_forwarding_rule.loadbalancer-firewall.ip_address
 }
+
