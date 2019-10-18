@@ -31,7 +31,7 @@ variable zone {
   default     = "europe-west1-b"
 }
 
-variable instances_count {
+variable instances {
   description = "Count of instances"
   default     = 1
 }
