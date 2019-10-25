@@ -25,7 +25,6 @@ module "vpc" {
   source           = "../modules/vpc"
   project          = var.project
   public_key_path  = var.public_key_path
-  private_key_path = var.private_key_path 
   source_ranges    = ["217.66.157.239/32"]
 }
 
