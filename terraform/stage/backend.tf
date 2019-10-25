@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    bucket  = "storage-bucket-eugenesable"
-    prefix  = "terraform/stage"
+    bucket = "storage-bucket-eugenesable"
+    prefix = "terraform/stage"
   }
 }
