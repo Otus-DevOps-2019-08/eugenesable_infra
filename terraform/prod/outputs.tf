@@ -3,7 +3,7 @@ output "app_external_ip" {
 }
 
 output "mongo_ip" {
-  value = "${module.db.internal_ip}"
+  value = "${module.db.mongo_ip}"
 }
 
 
