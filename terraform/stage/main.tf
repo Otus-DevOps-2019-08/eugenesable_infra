@@ -22,11 +22,14 @@ module "db" {
 }
 
 module "vpc" {
-  project         = var.project
-  public_key_path = var.public_key_path
-  source          = "../modules/vpc"
-  source_ranges   = ["0.0.0.0/0"]
+  project          = var.project
+  public_key_path  = var.public_key_path
+  private_key_path = var.private_key_path
+  source           = "../modules/vpc"
+  source_ranges    = ["0.0.0.0/0"]
 }
+
+
 
 
 
