@@ -8,14 +8,14 @@ variable region {
 }
 variable public_key_path {
   # Описание переменной
-  description = "Public key path"
+  description = "Path to the public key used for ssh access"
 }
 variable disk_image {
   description = "Disk image"
 }
 
 variable private_key_path {
-  description = "Private key path"
+  description = "Path to the private key used for ssh conection"
 }
 
 variable zone {
@@ -24,7 +24,7 @@ variable zone {
 }
 
 variable instances {
-  description = "Instances counter"
+  description = "Count of instances"
   default     = 1
 }
 
