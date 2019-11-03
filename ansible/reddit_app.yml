@@ -12,7 +12,26 @@
         mode: 0644 # <-- Права на файл, которые нужно установить
       tags: db-tag
       notify: restart mongod
+      
   handlers: 
   - name: restart nongo
     become: true
     service: name=mongod state=restarted
+
+  - name: reload puma
+    become: true
+    systemd: name=puma state=restarted
+
+  - name: Add unit file for Puma
+  become: true
+  copy:
+    src: files/puma.service
+    dest: /etc/systemd/system/puma.service
+  tags: app-tag
+  notify: reload puma
+
+- name: enable puma
+  become: true
+  systemd: name=puma enabled=yes
+  tags: app-tag
+
