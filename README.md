@@ -3,6 +3,122 @@ eugenesable Infra repository
 
 # Google Cloud Platform
 
+# Выполнено задание №8
+
+ - Ветка ansible-1
+ - Установлен Ansible ```pip install -r requirements.txt```
+ - Поднята stage инфраструктура
+ - Создан inventory ```appserver ansible_host=34.77.168.130 ansible_user=appuser ansible_private_key_file=~/.ssh/appuser```
+ - Проверена работоспособность с помощью модуля ping ```ansible appserver -i ./inventory -m ping```
+ - Добавлен хост dbserver: ```dbserver ansible_host=35.187.124.237 ansible_user=appuser ansible_private_key_file=~/.ssh/appuser```
+ - Добавлен ansible.cfg: 
+ ```
+ [defaults]
+ inventory = ./inventory
+ remote_user = appuser
+ private_key_file = ~/.ssh/appuser
+ host_key_checking = False
+ retry_files_enabled = False
+ ```
+ - inventory приведен к виду:
+ ```
+ [app]
+ appserver ansible_host=34.77.168.130
+ [db]
+ dbserver ansible_host=35.187.124.237
+ ``` 
+ - Добавлен inventory.yml:
+ ```
+ ---
+ app:
+   hosts:
+     appserver:
+       ansible_host: 34.77.168.130
+
+ db:
+   hosts:
+     dbserver:
+       ansible_host: 35.187.124.237
+ ```
+ - Переопределили инвентори файл с помощью -i: ```ansible all -m ping -i inventory.yml```
+ - Проверили выполнение команд:
+   ```ansible app -m command -a 'ruby -v'``` - Версия ruby на группе хостов app с помощью модуля command
+   ```ansible app -m shell -a 'ruby -v; bundler -v'``` - Версия ruby и bundle на группе хостов app с помощью модуля shell
+   ```ansible db -m command -a 'systemctl status mongod'``` - Статус монго с помощью модуля command
+   ```ansible db -m systemd -a name=mongod``` - Статус монго с помощью модуля systemd
+   ```ansible db -m service -a name=mongod``` - Статус монго с помощью модуля service
+   ```ansible app -m git -a 'repo=https://github.com/express42/reddit.git dest=/home/appuser/reddit'``` - Клонирование с помощью модуля git
+ - Добавлен плейбук clone.yml:
+ ```
+ ---
+ - name: Clone
+   hosts: app
+   tasks:
+     - name: Clone repo
+       git:
+         repo: https://github.com/express42/reddit.git
+         dest: /home/appuser/reddit
+```     
+ - Запуск плэйбука: ```ansible-playbook clone.yml```
+ - Добавлен статичский inventory.json:
+ ```
+ {
+    "app": {
+        "hosts": ["34.77.168.130"]
+    },
+    "db": {
+        "hosts": ["35.187.124.237"]
+    }
+}
+```
+- В интернетах найден скрипт для создания динмическогоg инвентори: https://gist.github.com/sivel/3c0745243787b9899486
+```
+import sys
+import json
+
+from ansible.parsing.dataloader import DataLoader
+
+try:
+    from ansible.inventory.manager import InventoryManager
+    A24 = True
+except ImportError:
+    from ansible.vars import VariableManager
+    from ansible.inventory import Inventory
+    A24 = False
+
+loader = DataLoader()
+if A24:
+    inventory = InventoryManager(loader, [sys.argv[1]])
+    inventory.parse_sources()
+else:
+    variable_manager = VariableManager()
+    inventory = Inventory(loader, variable_manager, sys.argv[1])
+    inventory.parse_inventory(inventory.host_list)
+
+out = {'_meta': {'hostvars': {}}}
+for group in inventory.groups.values():
+    out[group.name] = {
+        'hosts': [h.name for h in group.hosts],
+        'vars': group.vars,
+        'children': [c.name for c in group.child_groups]
+    }
+for host in inventory.get_hosts():
+    out['_meta']['hostvars'][host.name] = host.vars
+
+print(json.dumps(out, indent=4, sort_keys=True))
+```
+- Запуск ```python inventory2json.py inventory``` - вынесено в inventory.sh
+- Изменен ansible.cfg:
+```
+[defaults]
+inventory = ./inventory.sh
+remote_user = appuser
+private_key_file = ~/.ssh/appuser
+host_key_checking = False
+retry_files_enabled = False
+```
+
+
 # Выполнено задание №7
  
  - Ветка terraform-2
