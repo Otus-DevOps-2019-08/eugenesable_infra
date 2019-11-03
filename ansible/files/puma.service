@@ -4,6 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
+EnvironmentFile=/home/appuser/db_config
 User=appuser
 WorkingDirectory=/home/appuser/reddit
 ExecStart=/bin/bash -lc 'puma'
@@ -11,4 +12,3 @@ Restart=always
 
 [Install]
 WantedBy=multi-user.target
-
