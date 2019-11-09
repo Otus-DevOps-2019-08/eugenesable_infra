@@ -9,7 +9,7 @@ module "storage-bucket" {
   version = "0.3.0"
 
   # Имя поменяйте на другое
-  name     = "storage-bucket-eugenesable"
+  name     = "storage-bucket-eugenesable-1"
   location = var.region
 }
 
