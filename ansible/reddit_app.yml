@@ -3,7 +3,7 @@
   hosts: all
   vars:
     mongo_bind_ip: 0.0.0.0
-    db_host: 10.132.15.228
+    db_host: 10.132.15.230
   tasks:
     - name: Change mongo config file
       become: true # <-- Выполнить задание от root
@@ -55,3 +55,4 @@
   - name: reload puma
     become: true
     systemd: name=puma state=restarted
+    
