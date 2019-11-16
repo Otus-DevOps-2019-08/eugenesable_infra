@@ -1,3 +1,4 @@
+
 ---
 - name: Ruby & Bundler
   hosts: all
