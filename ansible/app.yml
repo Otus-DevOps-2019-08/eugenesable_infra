@@ -1,5 +1,5 @@
----
 
+---
 - name: Configure App
   hosts: app
   become: true
@@ -27,4 +27,3 @@
     become: true
     systemd: name=puma state=restarted
 
-    

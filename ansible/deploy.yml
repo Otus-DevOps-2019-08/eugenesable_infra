@@ -1,5 +1,5 @@
----
 
+---
 - name: Deploy reddit-app
   hosts: app
   tags: deploy-tag
