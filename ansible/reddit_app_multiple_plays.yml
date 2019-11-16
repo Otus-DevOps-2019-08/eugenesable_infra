@@ -1,4 +1,5 @@
 ---
+
 - name: Configure MongoDB
   hosts: db
   tags: db-tag
@@ -66,3 +67,4 @@
   - name: restart puma
     become: true
     systemd: name=puma state=restarted
+
