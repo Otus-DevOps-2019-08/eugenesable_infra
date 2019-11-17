@@ -1,0 +1,14 @@
+---
+plugin: gcp_compute
+projects:
+  - infra-******
+service_account_file: ~/keys/infra.json
+auth_kind: serviceaccount
+hostnames:
+  - name
+groups:
+  app: "'-app' in name"
+  db: "'-db' in name"
+compose:
+  ansible_host: networkInterfaces[0].accessConfigs[0].natIP
+  internal_ip: networkInterfaces[0].networkIP
