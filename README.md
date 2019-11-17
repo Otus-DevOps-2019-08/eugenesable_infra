@@ -3,6 +3,15 @@ eugenesable Infra repository
 
 # Google Cloud Platform
 
+# Выполнено задание №10
+
+ - Ветка ansible-3
+ - Инициализированы роли app и db 
+ ```ansible-galaxy init app``` 
+ ```ansible-galaxy init db```
+ - template, vars, handler и task перенесены в роль db и app соответственно
+ - В плэйбуках app и db добвлены соответсвующие роли
+
 # Выполнено задание №9
 
  - Ветка ansible-2
