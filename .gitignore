@@ -6,3 +6,4 @@ variables.json
 .terraform/
 *.retry
 inventory.gcp.yml
+jdauphant.nginx
