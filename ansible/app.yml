@@ -4,9 +4,6 @@
   hosts: app
   become: true
   
-  vars:
-   db_host: "{{ hostvars['reddit-db'].internal_ip }}"
-  
   roles: 
     - app
 
