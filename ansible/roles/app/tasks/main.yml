@@ -20,3 +20,10 @@
 
 - name: enable puma
   systemd: name=puma enabled=yes
+
+- name: allow ssh by password
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PasswordAuthentication no'
+    line: PasswordAuthentication yes
+  notify: reload sshd

@@ -4,4 +4,7 @@
 - name: reload puma
   become: true
   systemd: name=puma state=restarted
-  
+
+- name: reload sshd
+  become: true
+  systemd: name=sshd state=restarted
