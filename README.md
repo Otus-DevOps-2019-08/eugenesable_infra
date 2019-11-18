@@ -6,12 +6,135 @@ eugenesable Infra repository
 # Выполнено задание №10
 
  - Ветка ansible-3
+ - Добавлено Динамик Инвентори из прошлого ДЗ: очень удобно)
+ https://docs.ansible.com/ansible/latest/plugins/inventory/gcp_compute.html#examples
+ ```
+---
+plugin: gcp_compute
+projects:
+  - infra-******
+service_account_file: ~/keys/infra.json
+auth_kind: serviceaccount
+hostnames:
+  - name
+groups:
+  app: "'-app' in name"
+  db: "'-db' in name"
+compose:
+  ansible_host: networkInterfaces[0].accessConfigs[0].natIP
+  internal_ip: networkInterfaces[0].networkIP
+
+ ```  
+ - Изменили ansible.cfg - invetory.gcp.yml
  - Инициализированы роли app и db 
  ```ansible-galaxy init app``` 
  ```ansible-galaxy init db```
  - template, vars, handler и task перенесены в роль db и app соответственно
  - В плэйбуках app и db добвлены соответсвующие роли
+ - Добавлены inventory для окружений stage и prod
+ - Прод плэйбук теперь запускается так:``` ansible-playbook -i environments/prod/inventory deploy.yml```
+ - В конфиге ansible.cfg добавлен конфиг окружения stage поумолчанию
+ - Добавлены group_vars в каждое окружение, в которые выненсены переменные каждого прилажения
+ - В роли добавлена переменная - окружение поумолчанию - env:local
+ - Добавлен вывод информации об окружении в таски с помощью модуля debug:
+ ```
+ - name: Show info about the env this host belongs to
+   debug:
+     msg: "This host is in {{ env }} environment!!!"
+ ```    
+ - Реорганизована директория ansible/
+ - Изменен конфиг ansible.cfg:
+ ```
+ [defaults]
+inventory = ./environments/stage/inventory.gcp.yml
+remote_user = appuser
+private_key_file = ~/.ssh/appuser
+# Отключим проверку SSH Host-keys (поскольку они всегда разные для новых инстансов)
+host_key_checking = False
+# Отключим создание *.retry-файлов (они нечасто нужны, но мешаются под руками)
+retry_files_enabled = False
+# # Явно укажем расположение ролей (можно задать несколько путей через ; )
+roles_path = ./roles
+[diff]
+# Включим обязательный вывод diff при наличии изменений и вывод 5 строк контекста
+always = True
+context = 5
+```
+ - Собрано тестовое окуржение:
+ ```
+ TASK [db : Show info about the env this host belongs to] ***********************************************************************
+ ok: [reddit-db] => {
+    "msg": "This host is in stage environment!!!"
+ }
+ TASK [app : Show info about the env this host belongs to] **********************************************************************
+ ok: [reddit-app] => {
+    "msg": "This host is in stage environment!!!"
+ }
+ ```   
+- Добавлена роль jdauphant.nginx:
+ ```ansible-galaxy install -r environments/stage/requirements.yml``` 
+- Настроено обратное проксирование в stage/group_vars/app и prod/group_vars/app:
+```
+nginx_sites:
+  default:
+    - listen 80
+    - server_name "reddit"
+    - location / {
+        proxy_pass http://127.0.0.1:9292;
+      }
+```
+- Добавлено правило ФВ в террафорсе для 80 порта:
+```
+resource "google_compute_firewall" "firewall_http" {
+  name    = "allow-http-default"
+  network = "default"
+  allow {
+    protocol = "tcp"
+    ports    = ["80"]
+  }
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["reddit-app"]
+}
+``` 
+- В плэйбук app.yml добавлена роль jdauphant.nginx
+- Добавлены настройки пользователей credentials.yml в обоих окружениях
+- Добавлен плэйбук для создания пользователей:
+```
 
+---
+- name: Create users
+  hosts: all
+  become: true
+
+  vars_files:
+    - "{{ inventory_dir }}/credentials.yml"
+
+  tasks:
+    - name: create users
+      user:
+        name: "{{ item.key }}"
+        password: "{{ item.value.password|password_hash('sha512', 65534|random(seed=inventory_hostname)|string) }}"
+        groups: "{{ item.value.groups | default(omit) }}"
+      with_dict: "{{ credentials.users }}"
+
+```
+- Зашифрованы настройки пользователей credentials.yml в обоих окружениях:
+```ansible-vault encrypt environments/prod/credentials.yml```
+```ansible-vault encrypt environments/stage/credentials.yml```
+- Собран stage. Доступ по паролю не разрешен по умолчанию. Добавлена таска в app, которая изменяет конфиг sshd и хендлер, перезапускающий sshd:
+```
+- name: allow ssh by password
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PasswordAuthentication no'
+    line: PasswordAuthentication yes
+  notify: reload sshd
+```
+```
+- name: reload sshd
+  become: true
+  systemd: name=sshd state=restarted
+```
 # Выполнено задание №9
 
  - Ветка ansible-2
