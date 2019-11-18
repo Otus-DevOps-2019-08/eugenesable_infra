@@ -23,6 +23,7 @@ module "db" {
 
 module "vpc" {
   project          = var.project
+  private_key_path = var.private_key_path
   public_key_path  = var.public_key_path
   source           = "../modules/vpc"
   source_ranges    = ["0.0.0.0/0"]

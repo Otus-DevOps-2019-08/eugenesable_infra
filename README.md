@@ -3,6 +3,234 @@ eugenesable Infra repository
 
 # Google Cloud Platform
 
+# Выполнено задание №9
+
+ - Ветка ansible-2
+ - В модулях app и db закомментированы провижинеры и создано новое окружение
+ - Добавлен плэйбук reddit_app.yml:
+  
+   ```
+   ---
+   - name: Con§igure hosts & deploy application
+     hosts: all
+     vars:
+       mongo_bind_ip: 0.0.0.0
+     tasks:
+       - name: Change mongo config file
+         become: true # <-- Выполнить задание от root
+         template:
+           src: templates/mongod.conf.j2 # <-- Путь до локального файла-шаблона
+           dest: /etc/mongod.conf # <-- Путь на удаленном хосте
+           mode: 0644 # <-- Права на файл, которые нужно установить
+         tags: db-tag
+         notify: restart mongo
+     handlers: 
+     - name: restart nongo
+       become: true
+       service: name=mongod state=restarted
+   ```
+- Добавлен шаблон mongod.conf.j2:
+- Пробный заупск: ``` ansible-playbook reddit_app.yml --check --limit db``` 
+- Добавлена переменная:
+   ```
+   vars:
+       mongo_bind_ip: 0.0.0.0
+   ```
+- Добавлен Handler:
+  ```
+  handlers: 
+  - name: restart nongo
+    become: true
+    service: name=mongod state=restarted
+  ```
+- Выполнение плэйбука: ```ansible-playbook reddit_app.yml --limit db```
+- Добален task для puma.service и handler для DATABASE_URL:
+```
+- name: Add unit file for Puma
+  become: true
+  copy:
+    src: files/puma.service
+    dest: /etc/systemd/system/puma.service
+  tags: app-tag
+  notify: reload puma
+
+- name: enable puma
+  become: true
+  systemd: name=puma enabled=yes
+  tags: app-tag
+
+handlers: 
+- name: reload puma
+  become: true
+  systemd: name=puma state=restarted
+
+```
+- Добавлен task для деплоя и установки ruby gems:
+```
+- name: Fetch the latest version of application code
+  git:
+    repo: 'https://github.com/express42/reddit.git'
+    dest: /home/appuser/reddit
+    version: monolith # <-- Указываем нужную ветку
+  tags: deploy-tag  
+  notify: reload puma
+
+- name: Bundle install
+  bundler:
+    state: present
+    chdir: /home/appuser/reddit # <-- В какой директории выполнить команду bundle
+  tags: deploy-tag
+```
+- Добавлен плэйбук reddit-app2.yml с 3-мя сценариями:
+```
+---
+- name: Configure MongoDB
+  hosts: db
+  tags: db-tag
+  become: true
+  vars:
+    mongo_bind_ip: 0.0.0.0
+  tasks:
+    - name: Change mongo config file
+      template:
+        src: templates/mongod.conf.j2
+        dest: /etc/mongod.conf
+        mode: 0644
+      notify: restart mongod
+
+  handlers:
+  - name: restart mongod
+    service: name=mongod state=restarted
+
+- name: Configure App
+  hosts: app
+  tags: app-tag
+  become: true
+  vars:
+   db_host: 10.132.0.5
+  tasks:
+    - name: Add unit file for Puma
+      copy:
+        src: files/puma.service
+        dest: /etc/systemd/system/puma.service
+      notify: reload puma
+
+    - name: Add config for DB connection
+      template:
+        src: templates/db_config.j2
+        dest: /home/appuser/db_config
+        owner: appuser
+        group: appuser
+
+    - name: enable puma
+      systemd: name=puma enabled=yes
+  
+  handlers:
+  - name: reload puma
+    become: true
+    systemd: name=puma state=restarted      
+
+- name: Deploy reddit-app
+  hosts: app
+  tags: deploy-tag
+  become: true
+  tasks:
+    - name: Fetch the latest version of application code
+      git:
+        repo: 'https://github.com/express42/reddit.git'
+        dest: /home/appuser/reddit
+        version: monolith # <-- Указываем нужную ветку
+      notify: reload puma
+    
+    - name: Bundle install
+      bundler:
+        state: present
+        chdir: /home/appuser/reddit # <-- В какой директории выполнить команду bundle
+
+  handlers:
+  - name: restart puma
+    become: true
+    systemd: name=puma state=restarted
+
+```
+- Из предыдущего плэйбука сформировано 3 app.yml, db.yml, deploy.yml:
+- Добавлен site.yml, который включает в себя все созданные ранее 3 плэйбука:
+```
+---
+- import_playbook: db.yml
+- import_playbook: app.yml
+- import_playbook: deploy.yml
+``` 
+- МЕСТО ДЛЯ ЗАДАНИЯ СО* DYNAMIC INVENTORY
+- Добавлены плэйбуки для провиженинга образов пакера:
+  packer_app.yml:
+  ```
+  ---
+- name: Ruby & Bundler
+  hosts: all
+  become: true
+  tasks: 
+    - name: Install ruby-full ruby-bundler build-essential
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - ruby-full
+        - ruby-bundler
+        - build-essential
+  ```
+   packer_db.yml:
+  ```
+  ---
+- name: MongoDB
+  hosts: all
+  become: true
+  vars: 
+    key_id: D68FA50FEA312927
+  tasks:
+    - name: Add apt-key, mongo repo and update
+      apt_key:
+        keyserver: keyserver.ubuntu.com
+        id: "{{ key_id }}"
+    - name: Repo
+      apt_repository:
+        repo: deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse
+        state: present
+    - name: Update     
+      apt:
+        update_cache: yes
+    - name: Install mongo
+      apt:
+        name: mongodb-org
+        state: present 
+    - name: Mongo service
+      systemd: 
+        name: mongod
+        state: started
+        enabled: yes
+
+  ``` 
+- Изменены провиженеры с shell на ansible:
+  app.json:
+  ```
+  "provisioners": [
+        {
+            "type": "ansible",
+            "playbook_file": "ansible/packer_app.yml"
+        }
+  ]
+  ```
+  db.json:
+  ```
+  "provisioners": [
+        {
+            "type": "ansible",
+            "playbook_file": "ansible/packer_db.yml"
+        }
+  ]
+  ```
+  -  Собрано окружение с новыми образами
+    
 # Выполнено задание №8
 
  - Ветка ansible-1
