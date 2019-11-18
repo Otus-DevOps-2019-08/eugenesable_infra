@@ -1,5 +1,4 @@
 
-
 ---
 
 - name: Configure App
@@ -8,5 +7,5 @@
   
   roles: 
     - app
-    - jdauphant.nginx
+    #    - jdauphant.nginx
     
