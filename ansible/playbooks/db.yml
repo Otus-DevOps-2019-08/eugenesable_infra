@@ -1,4 +1,5 @@
 
+
 ---
 
 - name: Configure MongoDB
@@ -8,4 +9,3 @@
   roles:
     - db
 
-      
