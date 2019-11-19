@@ -11,7 +11,6 @@
         dest: /home/appuser/reddit
         version: monolith # <-- Указываем нужную ветку
       notify: restart puma
-    
     - name: Bundle install
       bundler:
         state: present

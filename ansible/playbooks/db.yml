@@ -1,0 +1,11 @@
+
+
+---
+
+- name: Configure MongoDB
+  hosts: db
+  become: true
+
+  roles:
+    - db
+

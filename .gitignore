@@ -5,3 +5,5 @@ variables.json
 *.tfvars
 .terraform/
 *.retry
+inventory.gcp.yml
+jdauphant.nginx
