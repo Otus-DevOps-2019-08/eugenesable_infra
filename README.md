@@ -135,6 +135,11 @@ resource "google_compute_firewall" "firewall_http" {
   become: true
   systemd: name=sshd state=restarted
 ```
+Задание со *:
+- Выполнено  помощью gcp_compute. В окуржения добавлены inventory.gcp.yml
+Задание с **
+- че-то не понял пока...
+
 # Выполнено задание №9
 
  - Ветка ansible-2
