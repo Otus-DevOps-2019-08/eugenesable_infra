@@ -7,3 +7,10 @@ variables.json
 *.retry
 inventory.gcp.yml
 jdauphant.nginx
+# Vagrant & molecule
+.vagrant/
+*.log
+*.pyc
+.molecule
+.cache
+.pytest_cache
