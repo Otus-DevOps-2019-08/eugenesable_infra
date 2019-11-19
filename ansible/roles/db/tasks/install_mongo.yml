@@ -1,14 +1,7 @@
----
-- name: MongoDB
-  hosts: all
-  become: true
-  vars: 
-    key_id: D68FA50FEA312927
-  tasks:
     - name: Add apt-key, mongo repo and update
       apt_key:
         keyserver: keyserver.ubuntu.com
-        id: "{{ key_id }}"
+        id: "D68FA50FEA312927"
       tags: install  
     - name: Repo
       apt_repository:
