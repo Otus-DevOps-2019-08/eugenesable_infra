@@ -9,4 +9,4 @@
     - install_mongo
 - include: config_mongo.yml
   tags:
-    - config_mongo 
+    - config_mongo
