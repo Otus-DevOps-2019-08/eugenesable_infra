@@ -6,7 +6,7 @@
 
 - include: install_mongo.yml
   tags:
-    - install_mongo 
+    - install_mongo
 - include: config_mongo.yml
   tags:
     - config_mongo
