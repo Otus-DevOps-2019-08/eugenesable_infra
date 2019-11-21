@@ -22,5 +22,4 @@
     name: mongod
     enabled: yes
     state: started
-  tags: install 
-   
+  tags: install    
