@@ -7,7 +7,7 @@ variables.json
 *.retry
 inventory.gcp.yml
 jdauphant.nginx
-db
+db/
 # Vagrant & molecule
 .vagrant/
 *.log
