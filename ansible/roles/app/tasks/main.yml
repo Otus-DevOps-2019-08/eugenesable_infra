@@ -9,5 +9,5 @@
   tags:
     - ruby
 - include: puma.yml
-  tags: 
+  tags:
     - puma

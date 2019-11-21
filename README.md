@@ -93,8 +93,40 @@ ansible.extra_vars = {
         ]}
       }
 ```
+- Установлен virtualenv: ```pip install virtualenv```
+- Создано виртуальное окружение в директории venv/: ```virtualenv venv```
+- Активировано: ```source venv/bin/activate```
+- Виртуальное коружеие установлены  Molecule, Ansible, Testinfra заданных версий
+- Проинициализирован шаблон сценария тестирования: ``` molecule init scenario --scenario-name default -r db -d vagrant```
+- Добалены тесты
+- Создана ВМ для тестирвания:``` molecule create```
+- Списко ВМ:```  molecule list```
+- SSH для дебага созданной ВМ:``` molecule login -h instance```
+- В пб для тестирования playbook.yml добавлен become и mongo_bind_ip и применен пб:
+```molecule converge```
+- Запущены тесты: ```molecule verify```
+- С помощью фреймворка Testinfra (https://testinfra.readthedocs.io/en/latest/modules.html#socket) добавлен тест на проверку порта монги:
+```
+def test_mongo_port(host):
+    assert host.socket("tcp://0.0.0.0:27017").is_listening
+``` 
+- Роли в пакер:
+```
+{
+            "type": "ansible",
+            "playbook_file": "../ansible/playbooks/packer_db.yml",
+            "ansible_env_vars": ["ANSIBLE_ROLES_PATH=../ansible/roles"],
+            "extra_arguments": ["--tags", "install_mongo"]
+}
 
-
+{
+            "type": "ansible",
+            "playbook_file": "../ansible/playbooks/packer_app.yml",
+            "ansible_env_vars": ["ANSIBLE_ROLES_PATH=../ansible/roles"],
+            "extra_arguments": ["--tags", "ruby"]
+}
+```
+- В ПБ пакера добавлены ссылки на роли db и app
 
 # Выполнено задание №10
 
