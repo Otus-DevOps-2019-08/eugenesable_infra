@@ -5,25 +5,9 @@
   debug:
     msg: "This host is in {{ env }} environment!!!"
 
-- name: Add unit file for Puma
-  copy:
-    src: puma.service
-    dest: /etc/systemd/system/puma.service
-  notify: reload puma
-
-- name: Add config for DB connection
-  template:
-    src: db_config.j2
-    dest: /home/appuser/db_config
-    owner: appuser
-    group: appuser
-
-- name: enable puma
-  systemd: name=puma enabled=yes
-
-- name: allow ssh by password
-  lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: '^PasswordAuthentication no'
-    line: PasswordAuthentication yes
-  notify: reload sshd
+- include: ruby.yml
+  tags:
+    - ruby
+- include: puma.yml
+  tags:
+    - puma

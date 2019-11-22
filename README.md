@@ -3,6 +3,131 @@ eugenesable Infra repository
 
 # Google Cloud Platform
 
+# Выполнено задание №11
+
+ - Ветка ansible-4
+ - Установлен VB и Vagrant
+ - В .gitignore добавлены служебные файлы вагранта
+ - Добавлен вагрант-файл с описанием серверов app и db
+ ```
+ Vagrant.configure("2") do |config|
+
+  config.vm.provider :virtualbox do |v|
+    v.memory = 512
+  end
+
+  config.vm.define "dbserver" do |db|
+    db.vm.box = "ubuntu/xenial64"
+    db.vm.hostname = "dbserver"
+    db.vm.network :private_network, ip: "10.10.10.10"
+  end
+  
+  config.vm.define "appserver" do |app|
+    app.vm.box = "ubuntu/xenial64"
+    app.vm.hostname = "appserver"
+    app.vm.network :private_network, ip: "10.10.10.20"
+  end
+end
+```
+- vagrant up - поднимает ВМ из Vagrant Cloud
+- Список box'ов:
+```
+bash-3.2$ vagrant box list
+ubuntu/xenial64 (virtualbox, 20191114.0.0)
+```
+- Статус ВМ:
+```
+bash-3.2$ vagrant status
+Current machine states:
+
+dbserver                  running (virtualbox)
+appserver                 running (virtualbox)
+```
+- ВМ доступны по ssh таким вот образом: ```vagrant ssh appserver```
+- На ВМ dbserver добавлен провиженер ansible, c плэйбуком site.yml, в котором определены переменные и группы серверов:
+```
+db.vm.provision "ansible" do |ansible|
+  ansible.playbook = "playbooks/site.yml"
+  ansible.groups = {
+  "db" => ["dbserver"],
+  "db:vars" => {"mongo_bind_ip" => "0.0.0.0"}
+  }
+end
+```
+- Запуск провиженера на заупенной ВМ: ```vagrant provision dbserver```
+- Упало с ошибкой: ```RUNNING HANDLER [db : restart mongod] ******************************************
+fatal: [dbserver]: FAILED! => {"changed": false, "msg": "Could not find the requested service mongod: host"}``` - на сервере нет установленной монги
+- Пб packer_db.yml добавлен в роль db 
+- Зачем-то добавлен плэйбук для установки пайтона, хотя ошибки не было:
+```
+---
+- name: Check && install python
+  hosts: all
+  become: true
+  gather_facts: False
+
+  tasks:
+    - name: Install python for Ansible
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+      changed_when: False
+```
+- Пб packer_app.yml добавлен в роль app
+- Добавлен провиженер с пб site.yml в appserver
+- Роль параметризирована для использования разными пользователями:
+```
+ansible.extra_vars = {
+ "deploy_user" => "ubuntu"
+ }
+```
+- В вагрант-файл добавлена настройка проксирования:
+```
+      ansible.extra_vars = {
+      "deploy_user" => "ubuntu",
+      "nginx_sites" => {
+        "default" => [
+          'listen 80',
+          'server_name "reddit"',
+          'location /{
+            proxy_pass http://localhost:9292;
+          }'
+        ]}
+      }
+```
+- Установлен virtualenv: ```pip install virtualenv```
+- Создано виртуальное окружение в директории venv/: ```virtualenv venv```
+- Активировано: ```source venv/bin/activate```
+- Виртуальное коружеие установлены  Molecule, Ansible, Testinfra заданных версий
+- Проинициализирован шаблон сценария тестирования: ``` molecule init scenario --scenario-name default -r db -d vagrant```
+- Добалены тесты
+- Создана ВМ для тестирвания:``` molecule create```
+- Списко ВМ:```  molecule list```
+- SSH для дебага созданной ВМ:``` molecule login -h instance```
+- В пб для тестирования playbook.yml добавлен become и mongo_bind_ip и применен пб:
+```molecule converge```
+- Запущены тесты: ```molecule verify```
+- С помощью фреймворка Testinfra (https://testinfra.readthedocs.io/en/latest/modules.html#socket) добавлен тест на проверку порта монги:
+```
+def test_mongo_port(host):
+    assert host.socket("tcp://0.0.0.0:27017").is_listening
+``` 
+- Роли в пакер:
+```
+{
+            "type": "ansible",
+            "playbook_file": "../ansible/playbooks/packer_db.yml",
+            "ansible_env_vars": ["ANSIBLE_ROLES_PATH=../ansible/roles"],
+            "extra_arguments": ["--tags", "install_mongo"]
+}
+
+{
+            "type": "ansible",
+            "playbook_file": "../ansible/playbooks/packer_app.yml",
+            "ansible_env_vars": ["ANSIBLE_ROLES_PATH=../ansible/roles"],
+            "extra_arguments": ["--tags", "ruby"]
+}
+```
+- В ПБ пакера добавлены ссылки на роли db и app
+
 # Выполнено задание №10
 
  - Ветка ansible-3
@@ -135,6 +260,11 @@ resource "google_compute_firewall" "firewall_http" {
   become: true
   systemd: name=sshd state=restarted
 ```
+Задание со *:
+- Выполнено  помощью gcp_compute. В окуржения добавлены inventory.gcp.yml
+Задание с **
+- че-то не понял пока...
+
 # Выполнено задание №9
 
  - Ветка ansible-2
